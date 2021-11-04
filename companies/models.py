@@ -27,6 +27,12 @@ class Employee(models.Model):
     def __str__(self):
         return f"{self.name} {self.surname}"
 
+    def create_card(self):
+        if not hasattr(self, 'card'):  # has no card
+            card = Card(employee=self)
+            card.save()
+        # maybe add an error message here
+
 
 class Card(models.Model):
     employee = models.OneToOneField(Employee, on_delete=models.PROTECT)
