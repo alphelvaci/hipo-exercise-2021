@@ -9,3 +9,10 @@ class Employee(models.Model):
 
     def __str__(self):
         return f"{self.name} {self.surname}"
+
+
+class Card(models.Model):
+    employee = models.OneToOneField(Employee, on_delete=models.PROTECT)
+
+    def __str__(self):
+        return f"{self.employee}'s Card (Card {self.id})"
