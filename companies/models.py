@@ -12,6 +12,12 @@ class Company(models.Model):
     def __str__(self):
         return f"{self.name}"
 
+    def list_cards(self):
+        cards = []
+        for employee in self.employee_set.all():
+            cards.append(employee.card)
+        return cards
+
 
 class Employee(models.Model):
     CONTRACT_TYPE_CHOICES = [
