@@ -11,6 +11,17 @@ class Employee(models.Model):
         return f"{self.name} {self.surname}"
 
 
+class Company(models.Model):
+    name = models.CharField(max_length=45)
+    employees = models.ManyToManyField(Employee)
+
+    class Meta:
+        verbose_name_plural = "companies"
+
+    def __str__(self):
+        return f"{self.name}"
+
+
 class Card(models.Model):
     employee = models.OneToOneField(Employee, on_delete=models.PROTECT)
 
