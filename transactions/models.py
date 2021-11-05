@@ -1,6 +1,7 @@
 from django.db import models
 from companies.models import Company, Card
 from restaurants.models import Restaurant
+from .helper_functions import get_amount_string
 
 # Create your models here.
 
@@ -10,11 +11,7 @@ class Transaction(models.Model):  # any transaction
     date = models.DateTimeField()
 
     def __str__(self):
-        if self.amount < 0:
-            amount_string = str(self.amount)
-        else:
-            amount_string = "+" + str(self.amount)
-        return f"Transaction {self.id} ({amount_string})"
+        return f"Transaction {self.id} ({get_amount_string(self)})"
 
 
 class CompanyTransaction(models.Model):  # any company transaction
@@ -22,7 +19,7 @@ class CompanyTransaction(models.Model):  # any company transaction
     company = models.ForeignKey(Company, on_delete=models.PROTECT)
 
     def __str__(self):
-        return f"{self.company} Transaction {self.id}"
+        return f"{self.company} Transaction {self.id} ({get_amount_string(self)})"
 
 
 class CardTransaction(models.Model):  # any card transaction
@@ -30,7 +27,7 @@ class CardTransaction(models.Model):  # any card transaction
     card = models.ForeignKey(Card, on_delete=models.PROTECT)
 
     def __str__(self):
-        return f"{self.card} Transaction {self.id}"
+        return f"{self.card} Transaction {self.id} ({get_amount_string(self)})"
 
 
 class RestaurantTransaction(models.Model):  # any restaurant transaction
@@ -38,7 +35,7 @@ class RestaurantTransaction(models.Model):  # any restaurant transaction
     restaurant = models.ForeignKey(Restaurant, on_delete=models.PROTECT)
 
     def __str__(self):
-        return f"{self.restaurant} Transaction {self.id}"
+        return f"{self.restaurant} Transaction {self.id} ({get_amount_string(self)})"
 
 
 # the following two models link transactions of two parties.
@@ -47,7 +44,14 @@ class CardTopup(models.Model):  # transaction between a company and a card
     company_transaction = models.OneToOneField(CompanyTransaction, on_delete=models.PROTECT)
     card_transactions = models.OneToOneField(CardTransaction, on_delete=models.PROTECT)
 
+    def __str__(self):
+        return f"{self.company_transaction.company}: {self.card_transactions.card} Topup {self.id} ({get_amount_string(self)})"
+
+
 
 class CardSpending(models.Model):  # transaction between a card an a restaurant
     card_transactions = models.OneToOneField(CardTransaction, on_delete=models.PROTECT)
     restaurant_transactions = models.OneToOneField(RestaurantTransaction, on_delete=models.PROTECT)
+
+    def __str__(self):
+        return f"{self.card_transactions.card} Spending {self.id} at {self.restaurant_transactions.restaurant} ({get_amount_string(self)})"
