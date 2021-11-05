@@ -39,3 +39,15 @@ class RestaurantTransaction(models.Model):  # any restaurant transaction
 
     def __str__(self):
         return f"{self.restaurant} Transaction {self.id}"
+
+
+# the following two models link transactions of two parties.
+# this would be useful, for example when reversing a spending.
+class CardTopup(models.Model):  # transaction between a company and a card
+    company_transaction = models.OneToOneField(CompanyTransaction, on_delete=models.PROTECT)
+    card_transactions = models.OneToOneField(CardTransaction, on_delete=models.PROTECT)
+
+
+class CardSpending(models.Model):  # transaction between a card an a restaurant
+    card_transactions = models.OneToOneField(CardTransaction, on_delete=models.PROTECT)
+    restaurant_transactions = models.OneToOneField(RestaurantTransaction, on_delete=models.PROTECT)
