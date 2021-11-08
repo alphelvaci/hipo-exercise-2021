@@ -47,6 +47,14 @@ class Employee(models.Model):
             card.save()
         # maybe add an error message here
 
+    def spend(self, restaurant, amount):
+        if not hasattr(self, 'card'):
+            raise Exception('Employee has no card!')
+        if self.card.balance < amount:
+            raise Exception('Balance insufficient!')
+        transaction = CardRestaurantTransaction(card=self.card, restaurant=restaurant, date=timezone.now(), amount=amount)
+        transaction.save()
+
 
 class Card(models.Model):
     employee = models.OneToOneField(Employee, on_delete=models.PROTECT)
