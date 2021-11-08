@@ -1,6 +1,8 @@
 from django.db import models
-from transactions.models import CompanyFundingTransaction
+from transactions.models import CompanyFundingTransaction, CompanyCardTransaction, CardRestaurantTransaction
 from django.utils import timezone
+from django.db.models import Sum
+from decimal import Decimal
 
 # Create your models here.
 
@@ -52,6 +54,16 @@ class Card(models.Model):
     @property
     def card_type(self):
         return self.employee.contract_type
+
+    @property
+    def balance(self):
+        company_card_sum = CompanyCardTransaction.objects.filter(card=self).aggregate(Sum('amount'))['amount__sum']
+        card_restaurant_sum = CardRestaurantTransaction.objects.filter(card=self).aggregate(Sum('amount'))['amount__sum']
+        if company_card_sum is None:
+            company_card_sum = Decimal('0')
+        if card_restaurant_sum is None:
+            card_restaurant_sum = Decimal('0')
+        return company_card_sum - card_restaurant_sum
 
     def __str__(self):
         return f"{self.employee}'s Card (Card {self.id})"
