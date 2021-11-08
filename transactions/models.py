@@ -17,3 +17,14 @@ class CompanyFundingTransaction(models.Model):
 
     def __str__(self):
         return f"Funding {self.id} ({self.company} +{self.amount})"
+
+
+class CompanyCardTransaction(models.Model):  # a positive amount implies a company to card transaction
+    card = models.ForeignKey(Card, on_delete=models.PROTECT)
+    amount = models.DecimalField(max_digits=11, decimal_places=2)
+    date = models.DateTimeField()
+
+    # todo constraint amount
+
+    def __str__(self):
+        return f"Transaction {self.id} ({self.card.employee.company} - {self.card} {self.amount})"
