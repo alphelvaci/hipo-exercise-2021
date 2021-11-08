@@ -1,4 +1,6 @@
 from django.db import models
+from transactions.models import CompanyFundingTransaction
+from django.utils import timezone
 
 # Create your models here.
 
@@ -17,6 +19,10 @@ class Company(models.Model):
         for employee in self.employee_set.all():
             cards.append(employee.card)
         return cards
+
+    def add_funds(self, amount):
+        transaction = CompanyFundingTransaction(company=self, date=timezone.now(), amount=amount)
+        transaction.save()
 
 
 class Employee(models.Model):
