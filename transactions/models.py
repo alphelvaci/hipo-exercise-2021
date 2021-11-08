@@ -1,12 +1,10 @@
 from django.db import models
-from companies.models import Company, Card
-from restaurants.models import Restaurant
 
 # Create your models here.
 
 
 class CompanyFundingTransaction(models.Model):
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=11, decimal_places=2)  # up to 999 millon
     date = models.DateTimeField()
 
@@ -20,7 +18,7 @@ class CompanyFundingTransaction(models.Model):
 
 
 class CompanyCardTransaction(models.Model):  # a positive amount implies a company to card transaction
-    card = models.ForeignKey(Card, on_delete=models.PROTECT)
+    card = models.ForeignKey('companies.Card', on_delete=models.PROTECT)
     amount = models.DecimalField(max_digits=11, decimal_places=2)
     date = models.DateTimeField()
 
@@ -31,8 +29,8 @@ class CompanyCardTransaction(models.Model):  # a positive amount implies a compa
 
 
 class CardRestaurantTransaction(models.Model):  # a positive amount implies a card to restaurant transaction
-    card = models.ForeignKey(Card, on_delete=models.PROTECT)
-    restaurant = models.ForeignKey(Restaurant, on_delete=models.PROTECT)
+    card = models.ForeignKey('companies.Card', on_delete=models.PROTECT)
+    restaurant = models.ForeignKey('restaurants.Restaurant', on_delete=models.PROTECT)
     amount = models.DecimalField(max_digits=11, decimal_places=2)
     date = models.DateTimeField()
 
