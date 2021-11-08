@@ -28,3 +28,15 @@ class CompanyCardTransaction(models.Model):  # a positive amount implies a compa
 
     def __str__(self):
         return f"Transaction {self.id} ({self.card.employee.company} - {self.card} {self.amount})"
+
+
+class CardRestaurantTransaction(models.Model):  # a positive amount implies a card to restaurant transaction
+    card = models.ForeignKey(Card, on_delete=models.PROTECT)
+    restaurant = models.ForeignKey(Restaurant, on_delete=models.PROTECT)
+    amount = models.DecimalField(max_digits=11, decimal_places=2)
+    date = models.DateTimeField()
+
+    # todo constraint amount
+
+    def __str__(self):
+        return f"Transaction {self.id} ({self.card} - {self.restaurant} {self.amount})"
