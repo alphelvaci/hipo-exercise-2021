@@ -51,7 +51,20 @@ class CardRestaurantTransaction(models.Model):  # a positive amount implies a ca
     amount = models.DecimalField(max_digits=11, decimal_places=2)
     date = models.DateTimeField(auto_now_add=True)
 
-    # todo constraint amount
+    def clean(self):
+        if self.card.terminated:
+            raise ValidationError('This card is terminated!')
+        if self.card.balance - self.amount < 0:
+            raise ValidationError('Insufficient card balance!')
+        if self.restaurant.balance + self.amount < 0:
+            raise ValidationError('Insufficient restaurant balance!')
+
+    def save(self, *args, **kwargs):
+        try:
+            self.clean()
+            super(CompanyCardTransaction, self).save(*args, **kwargs)
+        except ValidationError:
+            raise Exception('Error saving: could not validate instance')
 
     def __str__(self):
         return f"Transaction {self.id} ({self.card} - {self.restaurant} {self.amount})"
