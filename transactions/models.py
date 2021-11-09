@@ -26,7 +26,10 @@ class CompanyCardTransaction(models.Model):  # a positive amount implies a compa
     # todo constraint amount
 
     def __str__(self):
-        return f"Transaction {self.id} ({self.card.employee.company} - {self.card} {self.amount})"
+        if not self.card.terminated:
+            return f"Transaction {self.id} ({self.card.employee.company} - {self.card} {self.amount})"
+        else:
+            return f"Transaction {self.id} ({self.card} {self.amount})"
 
 
 class CardRestaurantTransaction(models.Model):  # a positive amount implies a card to restaurant transaction
