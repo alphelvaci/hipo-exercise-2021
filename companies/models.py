@@ -2,6 +2,7 @@ from django.db import models
 from transactions.models import CompanyFundingTransaction, CompanyCardTransaction, CardRestaurantTransaction
 from restaurants.models import Restaurant
 from django.db.models import Sum
+from django.core.exceptions import ValidationError
 from decimal import Decimal
 
 # Create your models here.
@@ -87,6 +88,17 @@ class Card(models.Model):
             return f"{self.employee}'s Card (Card {self.id})"
         else:
             return f"Terminated Card (Card {self.id})"
+
+    def clean(self):
+        if (self.employee is None) != self.terminated:  # enforce if and only if (<->)
+            raise ValidationError('Employee and terminated fields contradict!')
+
+    def save(self, *args, **kwargs):
+        try:
+            self.clean()
+            super(Card, self).save(*args, **kwargs)
+        except ValidationError:
+            raise Exception('Error saving: could not validate instance')
 
     def list_transactions(self):
         transactions = []
