@@ -1,5 +1,4 @@
 from django.db import models
-from django.utils import timezone
 
 # Create your models here.
 
@@ -7,7 +6,7 @@ from django.utils import timezone
 class CompanyFundingTransaction(models.Model):
     company = models.ForeignKey('companies.Company', on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=11, decimal_places=2)  # up to 999 millon
-    date = models.DateTimeField()
+    date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         constraints = [
@@ -21,7 +20,7 @@ class CompanyFundingTransaction(models.Model):
 class CompanyCardTransaction(models.Model):  # a positive amount implies a company to card transaction
     card = models.ForeignKey('companies.Card', on_delete=models.PROTECT)
     amount = models.DecimalField(max_digits=11, decimal_places=2)
-    date = models.DateTimeField()
+    date = models.DateTimeField(auto_now_add=True)
 
     # todo constraint amount
 
@@ -36,7 +35,7 @@ class CardRestaurantTransaction(models.Model):  # a positive amount implies a ca
     card = models.ForeignKey('companies.Card', on_delete=models.PROTECT)
     restaurant = models.ForeignKey('restaurants.Restaurant', on_delete=models.PROTECT)
     amount = models.DecimalField(max_digits=11, decimal_places=2)
-    date = models.DateTimeField()
+    date = models.DateTimeField(auto_now_add=True)
 
     # todo constraint amount
 
@@ -44,6 +43,6 @@ class CardRestaurantTransaction(models.Model):  # a positive amount implies a ca
         return f"Transaction {self.id} ({self.card} - {self.restaurant} {self.amount})"
 
     def refund(self):
-        transaction = CardRestaurantTransaction(card=self.card, restaurant=self.restaurant, date=timezone.now())
+        transaction = CardRestaurantTransaction(card=self.card, restaurant=self.restaurant)
         transaction.amount = -self.amount
         transaction.save()

@@ -1,7 +1,6 @@
 from django.db import models
 from transactions.models import CompanyFundingTransaction, CompanyCardTransaction, CardRestaurantTransaction
 from restaurants.models import Restaurant
-from django.utils import timezone
 from django.db.models import Sum
 from decimal import Decimal
 
@@ -32,7 +31,7 @@ class Company(models.Model):
         return restaurant_popularity
 
     def add_funds(self, amount):
-        transaction = CompanyFundingTransaction(company=self, date=timezone.now(), amount=amount)
+        transaction = CompanyFundingTransaction(company=self, amount=amount)
         transaction.save()
 
 
@@ -61,7 +60,7 @@ class Employee(models.Model):
             raise Exception('Employee has no card!')
         if self.card.balance < amount:
             raise Exception('Balance insufficient!')
-        transaction = CardRestaurantTransaction(card=self.card, restaurant=restaurant, date=timezone.now(), amount=amount)
+        transaction = CardRestaurantTransaction(card=self.card, restaurant=restaurant, amount=amount)
         transaction.save()
 
 
@@ -100,7 +99,7 @@ class Card(models.Model):
 
     def terminate(self):
         if self.balance > 0:
-            transaction = CompanyCardTransaction(card=self, date=timezone.now())
+            transaction = CompanyCardTransaction(card=self)
             transaction.amount = -self.balance  # transfer funds back to company
             transaction.save()
         if self.balance == 0:
