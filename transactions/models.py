@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 # Create your models here.
 
@@ -38,3 +39,8 @@ class CardRestaurantTransaction(models.Model):  # a positive amount implies a ca
 
     def __str__(self):
         return f"Transaction {self.id} ({self.card} - {self.restaurant} {self.amount})"
+
+    def refund(self):
+        transaction = CardRestaurantTransaction(card=self.card, restaurant=self.restaurant, date=timezone.now())
+        transaction.amount = -self.amount
+        transaction.save()
