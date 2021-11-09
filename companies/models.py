@@ -75,3 +75,12 @@ class Card(models.Model):
 
     def __str__(self):
         return f"{self.employee}'s Card (Card {self.id})"
+
+    def list_transactions(self):
+        transactions = []
+        for transaction in self.companycardtransaction_set.all():
+            transactions.append(transaction)
+        for transaction in self.cardrestauranttransaction_set.all():
+            transactions.append(transaction)
+        transactions.sort(key=lambda transaction: transaction.date)
+        return transactions
