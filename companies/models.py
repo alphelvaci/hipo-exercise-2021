@@ -66,7 +66,8 @@ class Employee(models.Model):
 
 
 class Card(models.Model):
-    employee = models.OneToOneField(Employee, on_delete=models.PROTECT)
+    employee = models.OneToOneField(Employee, on_delete=models.PROTECT, null=True)
+    terminated = models.BooleanField(default=False)
 
     @property
     def card_type(self):
@@ -83,7 +84,10 @@ class Card(models.Model):
         return company_card_sum - card_restaurant_sum
 
     def __str__(self):
-        return f"{self.employee}'s Card (Card {self.id})"
+        if not self.terminated:
+            return f"{self.employee}'s Card (Card {self.id})"
+        else:
+            return f"Terminated Card (Card {self.id})"
 
     def list_transactions(self):
         transactions = []
@@ -93,3 +97,15 @@ class Card(models.Model):
             transactions.append(transaction)
         transactions.sort(key=lambda transaction: transaction.date)
         return transactions
+
+    def terminate(self):
+        if self.balance > 0:
+            transaction = CompanyCardTransaction(card=self, date=timezone.now())
+            transaction.amount = -self.balance  # transfer funds back to company
+            transaction.save()
+        if self.balance == 0:
+            self.terminated = True
+            self.employee = None
+            self.save()
+        else:
+            raise Exception('Error!')
