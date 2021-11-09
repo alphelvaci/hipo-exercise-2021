@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 
 # Create your models here.
 
@@ -22,7 +23,20 @@ class CompanyCardTransaction(models.Model):  # a positive amount implies a compa
     amount = models.DecimalField(max_digits=11, decimal_places=2)
     date = models.DateTimeField(auto_now_add=True)
 
-    # todo constraint amount
+    def clean(self):
+        if self.card.terminated:
+            raise ValidationError('This card is terminated!')
+        if self.card.balance + self.amount < 0:
+            raise ValidationError('Insufficient card balance!')
+        if self.card.employee.company.balance - self.amount < 0:
+            raise ValidationError('Insufficient company balance!')
+
+    def save(self, *args, **kwargs):
+        try:
+            self.clean()
+            super(CompanyCardTransaction, self).save(*args, **kwargs)
+        except ValidationError:
+            raise Exception('Error saving: could not validate instance')
 
     def __str__(self):
         if not self.card.terminated:
