@@ -14,6 +14,16 @@ class Company(models.Model):
     class Meta:
         verbose_name_plural = "companies"
 
+    @property
+    def balance(self):
+        company_funding_sum = CompanyFundingTransaction.objects.filter(company=self).aggregate(Sum('amount'))['amount__sum']
+        company_card_sum = CompanyCardTransaction.objects.filter(card__employee__company=self).aggregate(Sum('amount'))['amount__sum']
+        if company_funding_sum is None:
+            company_funding_sum = Decimal('0')
+        if company_card_sum is None:
+            company_card_sum = Decimal('0')
+        return company_funding_sum - company_card_sum
+
     def __str__(self):
         return f"{self.name}"
 
