@@ -1,5 +1,6 @@
 from django.db import models
 from transactions.models import CompanyFundingTransaction, CompanyCardTransaction, CardRestaurantTransaction
+from restaurants.models import Restaurant
 from django.utils import timezone
 from django.db.models import Sum
 from decimal import Decimal
@@ -21,6 +22,14 @@ class Company(models.Model):
         for employee in self.employee_set.all():
             cards.append(employee.card)
         return cards
+
+    def list_top_restaurants(self):
+        restaurant_popularity = []  # [(restaurant, transaction_count)]
+        for restaurant in Restaurant.objects.all():
+            transaction_count = CardRestaurantTransaction.objects.filter(card__employee__company=self, restaurant=restaurant, amount__gt=0).count()
+            restaurant_popularity.append((restaurant, transaction_count))
+        restaurant_popularity.sort(key=lambda x: x[1], reverse=True)  # sort by transaction_count
+        return restaurant_popularity
 
     def add_funds(self, amount):
         transaction = CompanyFundingTransaction(company=self, date=timezone.now(), amount=amount)
