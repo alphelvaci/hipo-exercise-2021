@@ -62,7 +62,7 @@ class CardRestaurantTransaction(models.Model):  # a positive amount implies a ca
     def save(self, *args, **kwargs):
         try:
             self.clean()
-            super(CompanyCardTransaction, self).save(*args, **kwargs)
+            super(CardRestaurantTransaction, self).save(*args, **kwargs)
         except ValidationError:
             raise Exception('Error saving: could not validate instance')
 
