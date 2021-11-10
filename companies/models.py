@@ -70,10 +70,10 @@ class Employee(models.Model):
         return f"{self.name} {self.surname}"
 
     def create_card(self):
-        if not hasattr(self, 'card'):  # has no card
-            card = Card(employee=self)
-            card.save()
-        # maybe add an error message here
+        if hasattr(self, 'card'):
+            raise Exception('Employee already has a card!')
+        card = Card(employee=self)
+        card.save()
 
     def top_up_card(self):
         if not hasattr(self, 'card'):
