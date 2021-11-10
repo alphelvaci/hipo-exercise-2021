@@ -5,6 +5,7 @@ from django.db.models import Sum
 from django.core.exceptions import ValidationError
 from django.db import transaction as db_transaction
 from decimal import Decimal
+from datetime import datetime, timedelta
 
 # Create your models here.
 
@@ -35,11 +36,17 @@ class Company(models.Model):
         return cards
 
     def list_top_restaurants(self):
-        restaurant_popularity = []  # [(restaurant, transaction_count)]
-        for restaurant in Restaurant.objects.all():
-            transaction_count = CardRestaurantTransaction.objects.filter(card__employee__company=self, restaurant=restaurant, amount__gt=0).count()
-            restaurant_popularity.append((restaurant, transaction_count))
-        restaurant_popularity.sort(key=lambda x: x[1], reverse=True)  # sort by transaction_count
+        restaurant_popularity = {}  # {month: [(restaurant, transaction_count)]}
+        months = CardRestaurantTransaction.objects.filter(  # [(year, month)]
+            card__employee__company=self, amount__gt=0).values_list('date__year', 'date__month').distinct()
+        for month in months:
+            restaurant_popularity[month] = []
+            for restaurant in Restaurant.objects.all():
+                transaction_count = CardRestaurantTransaction.objects.filter(
+                    card__employee__company=self, restaurant=restaurant, amount__gt=0,
+                    date__year=month[0], date__month=month[1]).count()
+                restaurant_popularity[month].append((restaurant, transaction_count))
+            restaurant_popularity[month].sort(key=lambda x: x[1], reverse=True)  # sort by transaction_count
         return restaurant_popularity
 
     def add_funds(self, amount):
