@@ -119,11 +119,14 @@ class Card(models.Model):
         transactions.sort(key=lambda transaction: transaction.date)
         return transactions
 
-    def terminate(self):
+    def return_funds(self):
         if self.balance > 0:
             transaction = CompanyCardTransaction(card=self)
             transaction.amount = -self.balance  # transfer funds back to company
             transaction.save()
+
+    def terminate(self):
+        self.return_funds()
         if self.balance == 0:
             self.terminated = True
             self.employee = None
