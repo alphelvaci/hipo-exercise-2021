@@ -9,10 +9,16 @@ class CompanyFundingTransaction(models.Model):
     amount = models.DecimalField(max_digits=11, decimal_places=2)  # up to 999 millon
     date = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-        constraints = [
-            models.CheckConstraint(check=models.Q(amount__gt=0), name='amount_gt_0'),
-        ]
+    def clean(self):
+        if self.amount <= 0:
+            raise ValidationError('Amount must be greater than zero!')
+
+    def save(self, *args, **kwargs):
+        try:
+            self.clean()
+            super(CompanyFundingTransaction, self).save(*args, **kwargs)
+        except ValidationError:
+            raise Exception('Error saving: could not validate instance')
 
     def __str__(self):
         return f"Funding {self.id} ({self.company} +{self.amount})"
