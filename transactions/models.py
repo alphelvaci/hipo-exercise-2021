@@ -32,6 +32,8 @@ class CompanyCardTransaction(models.Model):  # a positive amount implies a compa
     def clean(self):
         if self.card.terminated:
             raise ValidationError('This card is terminated!')
+        if self.amount == 0:
+            raise ValidationError('Amount must not be zero!')
         if self.card.balance + self.amount < 0:
             raise ValidationError('Insufficient card balance!')
         if self.card.employee.company.balance - self.amount < 0:
@@ -60,6 +62,8 @@ class CardRestaurantTransaction(models.Model):  # a positive amount implies a ca
     def clean(self):
         if self.card.terminated:
             raise ValidationError('This card is terminated!')
+        if self.amount == 0:
+            raise ValidationError('Amount must not be zero!')
         if self.card.balance - self.amount < 0:
             raise ValidationError('Insufficient card balance!')
         if self.restaurant.balance + self.amount < 0:
