@@ -5,7 +5,6 @@ from django.db.models import Sum
 from django.core.exceptions import ValidationError
 from django.db import transaction as db_transaction
 from decimal import Decimal
-from datetime import datetime, timedelta
 
 # Create your models here.
 
