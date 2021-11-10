@@ -3,6 +3,7 @@ from transactions.models import CompanyFundingTransaction, CompanyCardTransactio
 from restaurants.models import Restaurant
 from django.db.models import Sum
 from django.core.exceptions import ValidationError
+from django.db import transaction as db_transaction
 from decimal import Decimal
 
 # Create your models here.
@@ -47,9 +48,11 @@ class Company(models.Model):
 
 
 class Employee(models.Model):
+    CONTRACT_TYPE_SMALLTOWN = 'small_town'
+    CONTRACT_TYPE_CITYCENTER = 'city_center'
     CONTRACT_TYPE_CHOICES = [
-        ('small_town', 'Small Town'),
-        ('city_center', 'City Center')
+        (CONTRACT_TYPE_SMALLTOWN, 'Small Town'),
+        (CONTRACT_TYPE_CITYCENTER, 'City Center')
     ]
 
     name = models.CharField(max_length=25)
@@ -65,6 +68,24 @@ class Employee(models.Model):
             card = Card(employee=self)
             card.save()
         # maybe add an error message here
+
+    def top_up_card(self):
+        if not hasattr(self, 'card'):
+            raise Exception('Employee has no card!')
+        with db_transaction.atomic():
+            # With select_for_update(), try and wait to lock the related card row in db.
+            # Even though the row itself being locked serves no purpose, it will prevent
+            # this code block being run simultaneously in high concurrency workloads.
+            # Note: This does not work with a sqlite backend.
+            Card.objects.filter(employee=self).select_for_update()
+            transaction = CompanyCardTransaction(card=self.card)
+            if self.contract_type == self.CONTRACT_TYPE_SMALLTOWN:
+                transaction.amount = 300 - self.card.balance
+            elif self.contract_type == self.CONTRACT_TYPE_CITYCENTER:
+                transaction.amount = 500 - self.card.balance
+            else:
+                raise Exception('Unsupported contract type!')
+            transaction.save()
 
     def spend(self, restaurant, amount):
         if not hasattr(self, 'card'):
